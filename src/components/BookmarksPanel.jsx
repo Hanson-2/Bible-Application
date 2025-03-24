@@ -1,47 +1,34 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 
-function BookmarksPanel({ onNavigate, onClose }) {
-  const [bookmarks, setBookmarks] = useState([]);
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('bibleNotes') || '{}');
-    const filtered = Object.entries(saved)
-      .filter(([_, data]) => data.bookmarked)
-      .map(([key, data]) => ({
-        reference: key,
-        note: data.note || '',
-      }));
-    setBookmarks(filtered);
-  }, []);
-
+function BookmarksPanel({ bookmarks = [], onNavigate, onClose }) {
   return (
-    <div className="fixed top-0 right-0 w-96 h-full bg-white dark:bg-gray-800 shadow-lg z-50 p-4 overflow-y-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Bookmarks</h2>
+    <div className="fixed top-0 right-0 w-80 h-full bg-white dark:bg-gray-800 shadow-lg z-50 overflow-y-auto border-l border-gray-300 dark:border-gray-700">
+      <div className="flex justify-between items-center p-4 border-b dark:border-gray-600">
+        <h2 className="text-lg font-semibold">Bookmarked Verses</h2>
         <button
+          className="text-sm px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
           onClick={onClose}
-          className="px-2 py-1 text-sm border rounded hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           Close
         </button>
       </div>
-      {bookmarks.length === 0 ? (
-        <p className="text-gray-500">No bookmarks saved yet.</p>
-      ) : (
-        <ul className="space-y-4">
-          {bookmarks.map(({ reference, note }) => (
+      <ul className="p-4 space-y-2">
+        {bookmarks.length === 0 && (
+          <li className="text-gray-500 dark:text-gray-400">No bookmarks yet.</li>
+        )}
+        {bookmarks.map((ref, idx) => {
+          const [book, chapter, verse] = ref.split('-');
+          return (
             <li
-              key={reference}
-              className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-700 p-2 rounded"
-              onClick={() => onNavigate(reference)}
-              title={note}
+              key={idx}
+              className="cursor-pointer text-blue-600 hover:underline"
+              onClick={() => onNavigate(`${book}-${chapter}`)}
             >
-              <div className="font-semibold">{reference}</div>
-              {note && <div className="text-sm text-gray-500 dark:text-gray-300">{note}</div>}
+              {book} {chapter}:{verse}
             </li>
-          ))}
-        </ul>
-      )}
+          );
+        })}
+      </ul>
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import BibleViewer from './components/BibleViewer';
 import NotesManager from './components/NotesManager';
 import BookmarksPanel from './components/BookmarksPanel';
@@ -7,8 +8,22 @@ function App() {
   const [book, setBook] = useState('Genesis');
   const [chapter, setChapter] = useState('1');
   const [showNotes, setShowNotes] = useState(false);
+  const [bookmarks, setBookmarks] = useState([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+
+  useEffect(() => {
+    const savedBookmarks = JSON.parse(localStorage.getItem('bibleBookmarks')) || [];
+    setBookmarks(savedBookmarks);
+  }, []);
+
+  const addBookmark = (reference) => {
+    if (!bookmarks.includes(reference)) {
+      const updated = [...bookmarks, reference];
+      setBookmarks(updated);
+      localStorage.setItem('bibleBookmarks', JSON.stringify(updated));
+    }
+  };
 
   const handleNavigate = (ref) => {
     if (!ref) {
@@ -75,11 +90,11 @@ function App() {
         </header>
 
         <main className="p-6 max-w-5xl mx-auto">
-          <BibleViewer book={book} chapter={chapter} />
+          <BibleViewer book={book} chapter={chapter} addBookmark={addBookmark} />
         </main>
 
         {showNotes && <NotesManager onNavigate={handleNavigate} />}
-        {showBookmarks && <BookmarksPanel onNavigate={handleNavigate} onClose={() => setShowBookmarks(false)} />}
+        {showBookmarks && <BookmarksPanel bookmarks={bookmarks} onNavigate={handleNavigate} onClose={() => setShowBookmarks(false)} />}
       </div>
     </div>
   );
